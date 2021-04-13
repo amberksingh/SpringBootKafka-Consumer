@@ -11,6 +11,9 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import com.springkafka.model.User;
 
 @Configuration
 @EnableKafka
@@ -31,6 +34,24 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory();
         factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+	
+	@Bean
+	public ConsumerFactory<String, User> userConsumerFactory(){
+		Map<String, Object> map=new HashMap<String, Object>();
+		map.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+		map.put(ConsumerConfig.GROUP_ID_CONFIG, "group_json");
+		map.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		map.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+		
+		return new DefaultKafkaConsumerFactory<>(map,new StringDeserializer(),new JsonDeserializer<>(User.class));
+	}
+	
+	@Bean
+    public ConcurrentKafkaListenerContainerFactory<String, User> userkafkaListenerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, User> factory = new ConcurrentKafkaListenerContainerFactory();
+        factory.setConsumerFactory(userConsumerFactory());
         return factory;
     }
 
